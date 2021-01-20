@@ -14,7 +14,7 @@ function generateRandomString() {
   let newString = "";
 
   while (newString.length < 6) {
-    newString += characters[Math.floor(Math.random() * chars.length)];
+    newString += characters[Math.floor(Math.random() * characters.length)];
   }
 
   return newString;

@@ -6,11 +6,15 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http//www.google.com"
 };
+/* Sends responses based on URL path */
 
-app.get("/", (req, res) => {
+app.get("/", (req, res) => { //Home
   res.send("Hello!");
 });
 
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });

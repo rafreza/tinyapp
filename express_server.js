@@ -100,11 +100,11 @@ app.post('/login', (req, res) => {
       res.redirect('/urls');
     } else {
       res.statusCode = 403;
-      res.send('<h2>403 Forbidden<br>You entered the wrong password.</h2>')
+      res.send('<h2>403 Forbidden<br>Wrong password.</h2>')
     }
   } else {
     res.statusCode = 403;
-    res.send('<h2>403 Forbidden<br>This email address is not registered.</h2>')
+    res.send('<h2>403 Forbidden<br>Email address is not registered.</h2>')
   }
 });
 

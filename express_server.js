@@ -87,6 +87,11 @@ app.get("/u/:shortURL", (req, res) => {
 })
 
 // login functionality
+app.get('/login', (req, res) => {
+  const templateVars = {user: users[req.cookies['user_id']]};
+  res.render('urls_login', templateVars);
+});
+
 app.post('/login', (req, res) => {
   res.cookie('user_id', req.body.username);
   res.redirect('/urls');

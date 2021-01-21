@@ -10,6 +10,7 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {};
+
 function generateRandomString() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let newString = "";
@@ -84,6 +85,11 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('urls');
+});
+
+app.get('/register', (req, res) => {
+  const templateVars = {username: req.cookies['username']};
+  res.render('urls_registration', templateVars);
 });
 
 app.listen(PORT, () => {

@@ -23,13 +23,13 @@ function generateRandomString() {
 
   return newString;
 }
-const findEmail = (email) => {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return true;
+const findUserInDatabase = (email, database) => {
+  for (const user in database) {
+    if (database[user].email === email) {
+      return database[user];
     }
   }
-  return false;
+  return undefined;
 }
 /* Sends responses based on URL path */
 
@@ -93,8 +93,19 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('user_id', req.body.username);
-  res.redirect('/urls');
+  const user = findUserInDatabase(req.body.email, users);
+  if (user) {
+    if (req.body.password === user.password) {
+      res.cookie('user_id', user.userID);
+      res.redirect('/urls');
+    } else {
+      res.statusCode = 403;
+      res.send('<h2>403 Forbidden<br>You entered the wrong password.</h2>')
+    }
+  } else {
+    res.statusCode = 403;
+    res.send('<h2>403 Forbidden<br>This email address is not registered.</h2>')
+  }
 });
 
 app.post('/logout', (req, res) => {
@@ -109,7 +120,7 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
   if (req.body.email && req.body.password) {
-    if (!findEmail(req.body.email)) {
+    if (!findUserInDatabase(req.body.email, users)) {
       const userID = generateRandomString();
       users[userID] = {
         userID,

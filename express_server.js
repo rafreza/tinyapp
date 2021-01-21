@@ -11,6 +11,8 @@ app.set("view engine", "ejs");
 
 const urlDatabase = {};
 
+const users = {};
+
 function generateRandomString() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let newString = "";
@@ -91,6 +93,18 @@ app.get('/register', (req, res) => {
   const templateVars = {username: req.cookies['username']};
   res.render('urls_registration', templateVars);
 });
+
+app.post('/register', (req, res) => {
+  const userID = generateRandomString();
+  users[userID] = {
+    userID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.cookie('user_id', userID);
+  res.redirect('/urls');
+});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

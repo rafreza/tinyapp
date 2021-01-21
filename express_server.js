@@ -10,6 +10,9 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {};
+
+const users = {};
+
 function generateRandomString() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let newString = "";
@@ -19,6 +22,14 @@ function generateRandomString() {
   }
 
   return newString;
+}
+const findUserInDatabase = (email, database) => {
+  for (const user in database) {
+    if (database[user].email === email) {
+      return database[user];
+    }
+  }
+  return undefined;
 }
 /* Sends responses based on URL path */
 
@@ -35,7 +46,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req,res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
+  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
   res.render('urls_index', templateVars);
 });
 
@@ -46,12 +57,12 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {username: req.cookies['username']};
+  const templateVars = {user: users[req.cookies['user_id']]};
   res.render('urls_new', templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username'] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies['user_id']]};
   res.render('urls_show', templateVars);
 });
 
@@ -75,16 +86,61 @@ app.get("/u/:shortURL", (req, res) => {
   }
 })
 
-// login functionality
+// login page & functionality
+app.get('/login', (req, res) => {
+  const templateVars = {user: users[req.cookies['user_id']]};
+  res.render('urls_login', templateVars);
+});
+
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
+  const user = findUserInDatabase(req.body.email, users);
+  if (user) {
+    if (req.body.password === user.password) {
+      res.cookie('user_id', user.userID);
+      res.redirect('/urls');
+    } else {
+      res.statusCode = 403;
+      res.send('<h2>403 Forbidden<br>Wrong password.</h2>')
+    }
+  } else {
+    res.statusCode = 403;
+    res.send('<h2>403 Forbidden<br>Email address is not registered.</h2>')
+  }
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('urls');
 });
+
+app.get('/register', (req, res) => {
+  const templateVars = {user: users[req.cookies['user_id']]};
+  res.render('urls_registration', templateVars);
+});
+
+app.post('/register', (req, res) => {
+  if (req.body.email && req.body.password) {
+    if (!findUserInDatabase(req.body.email, users)) {
+      const userID = generateRandomString();
+      users[userID] = {
+        userID,
+        email: req.body.email,
+        password: req.body.password
+      }
+      res.cookie('user_id', userID);
+      res.redirect('/urls');
+    } else {
+      res.statusCode = 400;
+      res.send('<h2>400 Bad Request<br>Invalid email, it has already been registered.<h2>');
+    }
+  } else {
+    res.statusCode = 400;
+    res.send('<h2>400 Bad Request<br>Please fill out all fields for registration.</h2>');
+  }
+  
+  
+});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

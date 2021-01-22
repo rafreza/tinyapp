@@ -142,7 +142,8 @@ app.post('/login', (req, res) => {
 //Logs user out and clears cookies, redirects to index page
 app.post('/logout', (req, res) => {
   res.clearCookie('session');
-  res.redirect('session.sig');
+  res.clearCookie('session.sig');
+  res.redirect('/urls');
 });
 //After login, redirects to URLs index page
 app.get('/register', (req, res) => {

@@ -12,23 +12,12 @@ const bcrypt = require('bcrypt');
 
 app.set("view engine", "ejs");
 
-const { getUserByEmail, generateRandomString } = require('./helpers')
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers')
 
 const urlDatabase = {};
 const users = {};
 
 
-
-const urlsForUser = (id) => {
-  const userURLs = {};
-
-  for (const shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      userURLs[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  return userURLs;
-}
 /* Sends responses based on URL path */
 
 app.get("/", (req, res) => { //Home
@@ -45,7 +34,7 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req,res) => {
   const userID = req.session.user_id;
-  const userURLs = urlsForUser(userID);
+  const userURLs = urlsForUser(userID, urlDatabase);
   const templateVars = { urls: userURLs, user: users[userID] };
   res.render('urls_index', templateVars);
 });
@@ -70,7 +59,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const userID = req.session.user_id;
-  const userUrls = urlsForUser(userID);
+  const userUrls = urlsForUser(userID, urlDatabase);
   const templateVars = { urls: userUrls, user: users[userID], shortURL: req.params.shortURL };
   res.render('urls_show', templateVars);
 });

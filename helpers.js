@@ -18,4 +18,15 @@ function generateRandomString() {
   return newString;
 }
 
-module.exports = { getUserByEmail, generateRandomString }
+const urlsForUser = (id, database) => {
+  const userURLs = {};
+
+  for (const shortURL in database) {
+    if (database[shortURL].userID === id) {
+      userURLs[shortURL] = database[shortURL];
+    }
+  }
+  return userURLs;
+}
+
+module.exports = { getUserByEmail, generateRandomString, urlsForUser }

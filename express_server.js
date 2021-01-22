@@ -21,7 +21,11 @@ const users = {};
 /* Sends responses based on URL path */
 
 app.get("/", (req, res) => { //Home
-  res.send("Hello!");
+  if (req.session.user_id) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get("/urls.json", (req, res) => { //JSON string for URLDatabase

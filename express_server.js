@@ -156,7 +156,7 @@ app.post('/register', (req, res) => {
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 10)
       }
-      req.session.user_id = userID);
+      req.session.user_id = userID;
       res.redirect('/urls');
     } else {
       res.statusCode = 400;

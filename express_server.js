@@ -35,7 +35,7 @@ const findUserInDatabase = (email, database) => {
 const urlsForUser = (id) => {
   const userURLs = {};
 
-  for (let shortURL in urlDatabase) {
+  for (const shortURL in urlDatabase) {
     if (urlDatabase[shortURL].userID === id) {
       userURLs[shortURL] = urlDatabase[shortURL];
     }
@@ -82,18 +82,25 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies['user_id']]};
+  const userID = req.cookies['user_id'];
+  const userUrls = urlsForUser(userID);
+  const templateVars = { urls: userUrls, user: users[userID], shortURL: req.params.shortURL };
   res.render('urls_show', templateVars);
 });
 
 app.post('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL].longURL = req.body.updatedURL;
+  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+    urlDatabase[shortURL].longURL = req.body.updatedURL;
+  }
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  const shortURL = req.params.shortURL;
+  if (req.cookies['user_id'] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[shortURL];
+  }
   res.redirect("/urls");
 });
 

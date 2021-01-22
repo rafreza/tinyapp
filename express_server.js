@@ -39,12 +39,18 @@ app.get('/urls', (req,res) => {
 });
 
 app.post('/urls', (req, res) => {
-  const shortURL = generateRandomString();
-  urlDatabase[shortURL] = {
-    longURL: req.body.longURL,
-    userID: req.session.userID
-  };
-  res.redirect(`/urls/${shortURL}`);
+  if (req.session.userID) {
+    const shortURL = generateRandomString();
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: req.session.userID
+    };
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    const errorMessage = 'Please login to view your new URLs.';
+    res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage});
+  }
+  
 });
 
 app.get('/urls/new', (req, res) => {
@@ -57,31 +63,45 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
   const userID = req.session.userID;
   const userUrls = urlsForUser(userID, urlDatabase);
   const templateVars = { urlDatabase, userUrls, shortURL, user: users[userID] };
+
   if (!urlDatabase[shortURL]) {
-    res.statusCode = 404;
+    const errorMessage = 'Short URL does not exist.';
+    res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage});
   } else if (!userID || !userUrls[shortURL]) {
-    res.statusCode = 401;
+    const errorMessage = 'Authorization required, please login to view.';
+    res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage});
+  } else {
+    res.render('urls_show', templateVars);
   }
-  res.render('urls_show', templateVars);
+  
 });
 
 app.post('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  if (req.session.userID === urlDatabase[shortURL].userID) {
+  if (req.session.userID && req.session.userID === urlDatabase[shortURL].userID) {
     urlDatabase[shortURL].longURL = req.body.updatedURL;
+    res.redirect(`/urls`);
+  } else {
+    const errorMessage = 'Authorization required, please login to view.';
+    res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage});
   }
-  res.redirect(`/urls`);
+  
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
-  if (req.session.userID === urlDatabase[shortURL].userID) {
+  if (req.session.userID && req.session.userID === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
+    res.redirect('/urls');
+  } else {
+    const errorMessage = 'Authorization required, please login to view.';
+    res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage});
   }
-  res.redirect('/urls');
+  
 });
 
 app.get('/u/:shortURL', (req, res) => {
@@ -111,7 +131,7 @@ app.post('/login', (req, res) => {
     req.session.userID = user.userID;
     res.redirect('/urls');
   } else {
-    const errorMessage = 'Login credentials not valid. Please enter the correct username and password.'
+    const errorMessage = 'Login credentials not valid. Please enter the correct username and password.';
     res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage});
   }
 });
@@ -143,12 +163,12 @@ app.post('/register', (req, res) => {
       req.session.userID = userID;
       res.redirect('/urls');
     } else {
-      res.statusCode = 400;
-      res.send('<h2>400 Bad Request<br>Invalid email, it has already been registered.<h2>');
+      const errorMessage = 'Cannot create new account, because this email address is already registered.';
+      res.status(400).render('urls_error', {user: users[req.session.userID], errorMessage});
     }
   } else {
-    res.statusCode = 400;
-    res.send('<h2>400 Bad Request<br>Please fill out all fields for registration.</h2>');
+    const errorMessage = 'Empty username or password. Please fill out both fields.';
+    res.status(400).render('urls_error', {user: users[req.session.userID], errorMessage});
   }
 });
 

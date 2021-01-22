@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
+
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -11,8 +12,9 @@ const bcrypt = require('bcrypt');
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {};
+const { getUserByEmail } = require('./helpers')
 
+const urlDatabase = {};
 const users = {};
 
 function generateRandomString() {
@@ -24,14 +26,6 @@ function generateRandomString() {
   }
 
   return newString;
-}
-const findUserInDatabase = (email, database) => {
-  for (const user in database) {
-    if (database[user].email === email) {
-      return database[user];
-    }
-  }
-  return undefined;
 }
 
 const urlsForUser = (id) => {
@@ -122,7 +116,7 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const user = findUserInDatabase(req.body.email, users);
+  const user = getUserByEmail(req.body.email, users);
   if (user) {
     if (bcrypt.compareSync(req.body.password, user.password)) {
       req.session.user_id = user.userID;
@@ -149,7 +143,7 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
   if (req.body.email && req.body.password) {
-    if (!findUserInDatabase(req.body.email, users)) {
+    if (!getUserByEmail(req.body.email, users)) {
       const userID = generateRandomString();
       users[userID] = {
         userID,

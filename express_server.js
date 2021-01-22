@@ -28,14 +28,6 @@ app.get("/", (req, res) => { //Home
   }
 });
 
-app.get("/urls.json", (req, res) => { //JSON string for URLDatabase
-  res.json(users);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 app.get("/urls", (req,res) => {
   const userID = req.session.user_id;
   const userURLs = urlsForUser(userID, urlDatabase);

@@ -4,13 +4,13 @@ const { getUserByEmail } = require('../helpers.js');
 
 const testUsers = {
   "aaa": {
-    id: "aaa", 
-    email: "lulz@example.com", 
+    id: "aaa",
+    email: "lulz@example.com",
     password: "OFWGkta-2012"
   },
   "zzz": {
-    id: "zzz", 
-    email: "kek@example.com", 
+    id: "zzz",
+    email: "kek@example.com",
     password: "sadboys-2001"
   }
 };

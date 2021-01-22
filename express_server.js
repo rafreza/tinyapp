@@ -10,7 +10,7 @@ app.use(cookieSession({name: 'session', secret: 'wh1t3-r053-d4rk-4rmy'}));
 
 const bcrypt = require('bcrypt');
 
-app.set("view engine", "ejs");
+app.set('view engine', 'ejs');
 
 const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
 
@@ -20,7 +20,7 @@ const users = {};
 
 /* Sends responses based on URL path */
 
-app.get("/", (req, res) => { //Home
+app.get('/', (req, res) => { //Home
   if (req.session.userID) {
     res.redirect('/urls');
   } else {
@@ -28,7 +28,7 @@ app.get("/", (req, res) => { //Home
   }
 });
 
-app.get("/urls", (req,res) => {
+app.get('/urls', (req,res) => {
   const userID = req.session.userID;
   const userURLs = urlsForUser(userID, urlDatabase);
   const templateVars = { urls: userURLs, user: users[userID] };
@@ -38,7 +38,7 @@ app.get("/urls", (req,res) => {
   res.render('urls_index', templateVars);
 });
 
-app.post("/urls", (req, res) => {
+app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
@@ -47,7 +47,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.get("/urls/new", (req, res) => {
+app.get('/urls/new', (req, res) => {
   if (req.session.userID) {
     const templateVars = {user: users[req.session.userID]};
     res.render('urls_new', templateVars);
@@ -56,7 +56,7 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-app.get("/urls/:shortURL", (req, res) => {
+app.get('/urls/:shortURL', (req, res) => {
   const userID = req.session.userID;
   const userUrls = urlsForUser(userID, urlDatabase);
   const templateVars = { urlDatabase, userUrls, shortURL, user: users[userID] };
@@ -76,23 +76,23 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect(`/urls`);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
   if (req.session.userID === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
   }
-  res.redirect("/urls");
+  res.redirect('/urls');
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  if (urlDatabase[req.params.shortURL]){
+app.get('/u/:shortURL', (req, res) => {
+  if (urlDatabase[req.params.shortURL]) {
     res.redirect(urlDatabase[req.params.shortURL].longURL);
   } else {
     const templateVars = { urlDatabase: {}, shortURL: '', user: users[req.session.userID] };
     res.statusCode = 404;
     res.render('urls_show', templateVars);
   }
-})
+});
 
 // login page & functionality
 app.get('/login', (req, res) => {
@@ -107,17 +107,12 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const user = getUserByEmail(req.body.email, users);
-  if (user) {
-    if (bcrypt.compareSync(req.body.password, user.password)) {
-      req.session.userID = user.userID;
-      res.redirect('/urls');
-    } else {
-      res.statusCode = 403;
-      res.send('<h2>403 Forbidden<br>Wrong password.</h2>')
-    }
+  if (user && bcrypt.compareSync(req.body.password, user.password)) {
+    req.session.userID = user.userID;
+    res.redirect('/urls');
   } else {
-    res.statusCode = 403;
-    res.send('<h2>403 Forbidden<br>Email address is not registered.</h2>')
+    const errorMessage = 'Login credentials not valid. Please enter the correct username and password.'
+    res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage});
   }
 });
 
@@ -144,7 +139,7 @@ app.post('/register', (req, res) => {
         userID,
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 10)
-      }
+      };
       req.session.userID = userID;
       res.redirect('/urls');
     } else {
@@ -154,7 +149,7 @@ app.post('/register', (req, res) => {
   } else {
     res.statusCode = 400;
     res.send('<h2>400 Bad Request<br>Please fill out all fields for registration.</h2>');
-  }  
+  }
 });
 
 

@@ -5,9 +5,9 @@ const getUserByEmail = (email, database) => {
     }
   }
   return undefined;
-}
+};
 
-function generateRandomString() {
+const generateRandomString = () => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let newString = "";
 
@@ -16,7 +16,7 @@ function generateRandomString() {
   }
 
   return newString;
-}
+};
 
 const urlsForUser = (id, database) => {
   const userURLs = {};
@@ -27,6 +27,6 @@ const urlsForUser = (id, database) => {
     }
   }
   return userURLs;
-}
+};
 
-module.exports = { getUserByEmail, generateRandomString, urlsForUser }
+module.exports = { getUserByEmail, generateRandomString, urlsForUser };

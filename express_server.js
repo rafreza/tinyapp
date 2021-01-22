@@ -7,6 +7,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+const bcrypt = require('bcrypt');
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {};
@@ -49,7 +51,7 @@ app.get("/", (req, res) => { //Home
 });
 
 app.get("/urls.json", (req, res) => { //JSON string for URLDatabase
-  res.json(urlDatabase);
+  res.json(users);
 });
 
 app.get("/hello", (req, res) => {
@@ -122,7 +124,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const user = findUserInDatabase(req.body.email, users);
   if (user) {
-    if (req.body.password === user.password) {
+    if (bcrypt.compareSync(req.body.password, user.password)) {
       res.cookie('user_id', user.userID);
       res.redirect('/urls');
     } else {
@@ -152,7 +154,7 @@ app.post('/register', (req, res) => {
       users[userID] = {
         userID,
         email: req.body.email,
-        password: req.body.password
+        password: bcrypt.hashSync(req.body.password, 10)
       }
       res.cookie('user_id', userID);
       res.redirect('/urls');

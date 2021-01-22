@@ -31,6 +31,17 @@ const findUserInDatabase = (email, database) => {
   }
   return undefined;
 }
+
+const urlsForUser = (id) => {
+  const userURLs = {};
+
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userURLs[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userURLs;
+}
 /* Sends responses based on URL path */
 
 app.get("/", (req, res) => { //Home
@@ -46,7 +57,9 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req,res) => {
-  const templateVars = { urls: urlDatabase, user: users[req.cookies['user_id']] };
+  const userID = req.cookies['user_id'];
+  const userURLs = urlsForUser(userID);
+  const templateVars = { urls: userURLs, user: users[userID] };
   res.render('urls_index', templateVars);
 });
 
@@ -143,9 +156,7 @@ app.post('/register', (req, res) => {
   } else {
     res.statusCode = 400;
     res.send('<h2>400 Bad Request<br>Please fill out all fields for registration.</h2>');
-  }
-  
-  
+  }  
 });
 
 

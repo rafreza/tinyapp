@@ -12,21 +12,12 @@ const bcrypt = require('bcrypt');
 
 app.set("view engine", "ejs");
 
-const { getUserByEmail } = require('./helpers')
+const { getUserByEmail, generateRandomString } = require('./helpers')
 
 const urlDatabase = {};
 const users = {};
 
-function generateRandomString() {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let newString = "";
 
-  while (newString.length < 6) {
-    newString += characters[Math.floor(Math.random() * characters.length)];
-  }
-
-  return newString;
-}
 
 const urlsForUser = (id) => {
   const userURLs = {};
